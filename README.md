@@ -24,11 +24,10 @@
 
 <h3 align="center">Gradient descent for your agent memory.</h3>
 
-Your `AGENTS.md` is a set of weights. Every agent session is a forward pass. The
-transcript that session leaves on disk is the loss signal - and today nothing reads it.
-The loop only closes when a human happens to remember a failure and edits the file by hand.
+[This blog post](https://blog.kunchenguid.com/p/your-agentsmd-is-a-neural-net) explains the why and how.
 
-`backpass` closes it. It finds the agent sessions that actually ran in your repo, reads
+`backpass` helps you improve your `AGENTS.md` and `CLAUDE.md` with scientific rigor. 
+It finds the agent sessions that actually ran in your repo, reads
 what happened in them, and proposes evidence-backed edits to your memory surface - the
 memory file and project skills - under a token budget, gated by you.
 
