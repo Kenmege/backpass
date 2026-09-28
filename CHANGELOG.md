@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.29](https://github.com/kunchenguid/backpass/compare/backpass-v0.1.28...backpass-v0.1.29) (2026-09-28)
+
+
+### Features
+
+* **apply:** keep reworded rejected edits suppressed and record optional reject reasons ([#162](https://github.com/kunchenguid/backpass/issues/162)) ([9e2f0ce](https://github.com/kunchenguid/backpass/commit/9e2f0ce5279fc4f6300e4e6b182441074d7f5f71))
+* train named nested memory files in monorepos ([#159](https://github.com/kunchenguid/backpass/issues/159)) ([87a79fb](https://github.com/kunchenguid/backpass/commit/87a79fb6f9cd6754203b4584978687e06f824e02))
+
+
+### Bug Fixes
+
+* **discovery:** include Hermes TUI sessions with absolute cwd ([#146](https://github.com/kunchenguid/backpass/issues/146)) ([0cdf949](https://github.com/kunchenguid/backpass/commit/0cdf949cac77b4cdf870c30fa98c2038753db23e))
+
 ## [0.1.28](https://github.com/kunchenguid/backpass/compare/backpass-v0.1.27...backpass-v0.1.28) (2026-09-25)
 
 
