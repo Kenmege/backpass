@@ -509,7 +509,8 @@ export class AgentResolver {
 
   /**
    * Run `fn(pick)` for a role, falling through the ladder on classifiable failures.
-   * Unclassifiable errors (a timeout on real work, garbage output) propagate unchanged.
+   * Unclassifiable errors (garbage output) propagate unchanged. A timeout on real work propagates
+   * unchanged for pinned and auto-picked agents alike.
    */
   async withFallthrough(role, fn) {
     for (;;) {
@@ -519,7 +520,7 @@ export class AgentResolver {
       } catch (err) {
         const isAcpxError = err instanceof AcpxError;
         const verdict = isAcpxError ? classifyAcpxFailure(err) : null;
-        if (isAcpxError && pick.pinned) throw pinnedFailureError(role, pick, verdict, err);
+        if (isAcpxError && pick.pinned && !err.timedOut) throw pinnedFailureError(role, pick, verdict, err);
         if (!verdict) throw err;
         await this.demote(role, pick, verdict, err.message, isAcpxError ? err.stderr : "");
       }

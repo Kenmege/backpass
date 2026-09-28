@@ -524,6 +524,18 @@ test("explicit config or CLI flags pin the role and skip the ladder entirely", a
       return true;
     },
   );
+
+  // A timeout on real work is not the pinned agent's verdict: it propagates unchanged.
+  const timedOut = new AcpxError("acpx claude session prompt timed out after 600s", { timedOut: true });
+  await assert.rejects(
+    resolver.withFallthrough("synthesis", async () => {
+      throw timedOut;
+    }),
+    (err) => {
+      assert.equal(err, timedOut);
+      return true;
+    },
+  );
 });
 
 test("a pinned agent that returns no output gets a provider-account hint, not a login one", async () => {
