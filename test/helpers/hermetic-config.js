@@ -13,4 +13,19 @@ import path from "node:path";
  */
 const configHome = fs.mkdtempSync(path.join(os.tmpdir(), "backpass-test-config-"));
 process.env.XDG_CONFIG_HOME = configHome;
-process.on("exit", () => fs.rmSync(configHome, { recursive: true, force: true }));
+const removeConfigHome = () => fs.rmSync(configHome, { recursive: true, force: true });
+process.on("exit", removeConfigHome);
+
+// A signal skips `exit`, so remove the directory here too, then re-raise the same signal
+// so the process still ends with the conventional signal exit.
+const signals = ["SIGINT", "SIGTERM"];
+const onSignal = (signal) => {
+  try {
+    removeConfigHome();
+  } catch {
+    // best-effort
+  }
+  for (const s of signals) process.removeListener(s, onSignal);
+  process.kill(process.pid, signal);
+};
+for (const signal of signals) process.once(signal, onSignal);
