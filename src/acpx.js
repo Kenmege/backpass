@@ -48,7 +48,15 @@ export function effortOptionKey(agent) {
 export class AcpxError extends Error {
   constructor(
     message,
-    { stdout = "", stderr = "", code = null, timedOut = false, spawnError = null, emptyOutput = false } = {},
+    {
+      stdout = "",
+      stderr = "",
+      code = null,
+      timedOut = false,
+      spawnError = null,
+      emptyOutput = false,
+      stage = null,
+    } = {},
   ) {
     super(message);
     this.name = "AcpxError";
@@ -61,6 +69,8 @@ export class AcpxError extends Error {
     this.unsupported = false;
     /** Set when the call exited clean but produced no usable text - see `assertNonEmptyOutput`. */
     this.emptyOutput = emptyOutput;
+    /** "verify" when the adapter-configuration check timed out, before any prompt ran. */
+    this.stage = stage;
   }
 }
 
@@ -357,7 +367,7 @@ async function verifyHarnessInvocation(invocation, cwd, { timeoutMs = VERIFY_CON
   if (result.timedOut) {
     throw new AcpxError(
       `acpx config show timed out verifying the ${invocation.requiredBuiltinAgent} adapter configuration`,
-      result,
+      { ...result, stage: "verify" },
     );
   }
   if (result.code !== 0) {

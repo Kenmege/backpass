@@ -331,7 +331,9 @@ export function reportError(err) {
   if (err instanceof AcpxError && err.timedOut) {
     fail(err.message);
     console.error(
-      "  the harness call timed out; rerun to retry - finished analysis is cached - or raise timeoutSeconds in the backpass config",
+      err.stage === "verify"
+        ? "  acpx was too slow to start (adapter-configuration check timed out twice); rerun when the host is less loaded - finished analysis is cached"
+        : "  the harness call timed out; rerun to retry - finished analysis is cached - or raise timeoutSeconds in the backpass config",
     );
     return 1;
   }

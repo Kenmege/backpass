@@ -712,7 +712,12 @@ test("a timed-out adapter-configuration check fails the call, not the run", asyn
           cwd: workDir,
           verifyTimeoutMs: 2_000,
         }),
-      { name: "AcpxError", timedOut: true, message: /timed out verifying the codex adapter configuration/ },
+      {
+        name: "AcpxError",
+        timedOut: true,
+        stage: "verify",
+        message: /timed out verifying the codex adapter configuration/,
+      },
     );
   } finally {
     delete process.env.FAKE_CONFIG_SHOW_HANG;
