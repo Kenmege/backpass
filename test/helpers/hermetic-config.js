@@ -22,18 +22,39 @@ const root = fs.mkdtempSync(path.join(os.tmpdir(), "backpass-test-root-"));
 process.env.TMPDIR = root;
 const configHome = fs.mkdtempSync(path.join(root, "config-"));
 process.env.XDG_CONFIG_HOME = configHome;
-const removeRoot = () => fs.rmSync(root, { recursive: true, force: true });
+/** Make every directory under `dir` writable again, so a test that failed before restoring its
+ * 0o555 fixture cannot keep the root from being removed. */
+function restoreWritable(dir) {
+  try {
+    fs.chmodSync(dir, 0o755);
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) restoreWritable(path.join(dir, entry.name));
+    }
+  } catch {
+    // best-effort: the retry below reports nothing either way
+  }
+}
+
+/** Best-effort removal: it must never add a stack trace to a run that is already ending. */
+const removeRoot = () => {
+  try {
+    fs.rmSync(root, { recursive: true, force: true });
+  } catch {
+    restoreWritable(root);
+    try {
+      fs.rmSync(root, { recursive: true, force: true });
+    } catch {
+      // leave it to the OS temp reaper rather than fail the exit
+    }
+  }
+};
 process.on("exit", removeRoot);
 
 // A signal skips `exit`, so remove the directory here too, then re-raise the same signal
 // so the process still ends with the conventional signal exit.
 const signals = ["SIGINT", "SIGTERM"];
 const onSignal = (signal) => {
-  try {
-    removeRoot();
-  } catch {
-    // best-effort
-  }
+  removeRoot();
   for (const s of signals) process.removeListener(s, onSignal);
   process.kill(process.pid, signal);
 };
