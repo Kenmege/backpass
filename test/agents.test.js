@@ -428,6 +428,24 @@ test("only classifiable failures fall through; real-work errors propagate unchan
     (err) => err === timeout,
   );
   assert.equal((await resolver.resolve("analysis")).agent, "pi", "a timeout on real work does not demote");
+  const authTimeout = new AcpxError("acpx pi session prompt timed out after 300s", {
+    timedOut: true,
+    stderr: "AUTH_REQUIRED",
+  });
+  let calls = 0;
+  await assert.rejects(
+    resolver.withFallthrough("analysis", async () => {
+      calls++;
+      throw authTimeout;
+    }),
+    (err) => err === authTimeout,
+  );
+  assert.equal(calls, 1);
+  assert.equal(
+    (await resolver.resolve("analysis")).agent,
+    "pi",
+    "a timeout whose stderr looks classifiable still does not demote",
+  );
   await assert.rejects(
     resolver.withFallthrough("analysis", async () => {
       throw new Error("analysis returned no parseable JSON");
@@ -540,6 +558,21 @@ test("explicit config or CLI flags pin the role and skip the ladder entirely", a
       return true;
     },
   );
+
+  // Even when its stderr carries a classifiable diagnostic, a pinned timeout is not retried.
+  const authTimeout = new AcpxError("acpx claude session prompt timed out after 600s", {
+    timedOut: true,
+    stderr: "AUTH_REQUIRED",
+  });
+  let pinnedCalls = 0;
+  await assert.rejects(
+    resolver.withFallthrough("synthesis", async () => {
+      pinnedCalls++;
+      throw authTimeout;
+    }),
+    (err) => err === authTimeout,
+  );
+  assert.equal(pinnedCalls, 1, "a pinned timeout is not retried");
 });
 
 test("a pinned agent that returns no output gets a provider-account hint, not a login one", async () => {
