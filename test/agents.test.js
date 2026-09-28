@@ -79,6 +79,10 @@ import os from "node:os";
 import path from "node:path";
 import { CONFIG_FILENAME } from "../src/config.js";
 
+// `loadConfig` merges ~/.config/backpass/config.json; a host with its own `ladders` there
+// would replace the default ladders these tests assert against.
+process.env.XDG_CONFIG_HOME = fs.mkdtempSync(path.join(os.tmpdir(), "backpass-agents-config-"));
+
 function tmpRepo(config) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "backpass-agents-"));
   if (config) fs.writeFileSync(path.join(dir, CONFIG_FILENAME), JSON.stringify(config));
